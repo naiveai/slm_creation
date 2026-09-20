@@ -1,4 +1,4 @@
-# Small Language Models
+# Small Language Models: Why the Future of AI is Local
 
 ## Introduction
 
@@ -206,13 +206,25 @@ significant caveats. Benchmark contamination — where test questions leak into
 training data — is a persistent concern, and high benchmark scores do not
 always translate to real-world utility.
 
+Beyond accuracy alone, an SLM should be evaluated across the practical
+trade-offs between **accuracy, latency, and cost**. Accuracy can be measured
+using task-specific metrics such as exact-match or F1 score for classification
+and question answering, pass@k for code generation, and human ratings for
+subjective outputs. **Latency** should be measured as time-to-first-token
+(TTFT) and tokens-per-second (TPS), ideally reported as median and p95 latency
+over a representative set of prompts rather than a single average. **Cost**
+can be measured as dollars per million input and output tokens, or as cost per
+completed task, including the hardware and infrastructure required to run the
+model. 
+
 For SLMs, the most meaningful evaluation is often **domain-specific and
 human-in-the-loop**. If the model is meant to be a coding assistant, it
 should be tested on realistic coding tasks by actual developers. If it is
 a medical triage tool, it should be evaluated by clinicians against real
-patient scenarios. The "vibe check" — does this model actually feel useful
-in practice? — remains an underrated but essential complement to automated
+patient scenarios. The "vibe check" - does this model actually feel useful
+in practice? - remains an underrated but essential complement to automated
 metrics.
+
 
 ## Conclusion
 
@@ -232,3 +244,101 @@ to improve and training techniques mature, the future of AI is lean, local,
 and sustainable. Small Language Models are a versatile and exciting method of
 utilizing Generative AI systems in practical, real-world applications where
 efficiency and specialization matter most.
+
+## Summary Diagram
+
+```mermaid
+flowchart TD
+    A([Start: Build an SLM]) --> B{What is the goal?}
+
+    B -->|Specialized task / domain| C[Use an existing pretrained model]
+    B -->|Need highly customized capabilities| D{Do you have substantial<br/>expertise and resources?}
+
+    C --> E{Need to transfer capabilities<br/>from a larger model?}
+    E -->|Yes| F[Knowledge Distillation]
+    E -->|No| G[Fine-tuning]
+
+    D -->|Yes| H[Train from Scratch]
+    D -->|No| F
+
+    %% Data pipeline
+    F --> I[Build a high-quality,<br/>curated dataset]
+    G --> I
+    H --> I
+
+    I --> J{How will training data<br/>be produced?}
+    J -->|Human / organic data| K[Curate and filter for<br/>quality, accuracy, coherence]
+    J -->|Synthetic data| L[Generate structured examples<br/>with a larger teacher model]
+    J -->|Both| M[Balance synthetic +<br/>organic data]
+
+    L --> N{Maintain dataset diversity<br/>and avoid model collapse?}
+    M --> N
+    K --> O[Training data ready]
+    N --> O
+
+    %% Architecture
+    O --> P{Choose architecture}
+    P --> Q[Optimize parameter budget]
+    Q --> R{Memory-constrained<br/>deployment?}
+    R -->|Yes| S[Use GQA to reduce<br/>KV-cache memory]
+    R -->|No| T[Choose dense or MoE<br/>based on compute needs]
+
+    S --> U[Consider depth vs width,<br/>weight sharing, embeddings]
+    T --> U
+
+    %% Training
+    U --> V{Training approach}
+    V -->|Pre-training| W[Next-token prediction<br/>for foundational knowledge]
+    V -->|Fine-tuning| X[Train on target-task/domain data]
+    V -->|Distillation| Y[Student learns from<br/>teacher responses/reasoning]
+
+    W --> Z[Hyperparameter tuning]
+    X --> Z
+    Y --> Z
+
+    Z --> AA[Monitor validation loss<br/>and held-out evaluation]
+    AA --> AB{Need behavior alignment?}
+    AB -->|Yes| AC[DPO / preference optimization]
+    AB -->|No| AD[Continue]
+
+    AC --> AD
+
+    %% Deployment
+    AD --> AE{Where will the SLM run?}
+    AE -->|Phone / embedded / CPU| AF[Quantize]
+    AE -->|GPU| AG[Choose suitable precision<br/>and quantization]
+    AE -->|Cloud / larger hardware| AH[Deploy with available precision]
+
+    AF --> AI{Target hardware}
+    AG --> AI
+    AI -->|CPU-oriented| AJ[GGUF]
+    AI -->|GPU / accuracy-sensitive| AK[AWQ]
+    AI -->|GPU / mixed precision| AL[EXL2]
+
+    AJ --> AM[Deploy]
+    AK --> AM
+    AL --> AM
+    AH --> AM
+
+    %% Evaluation loop
+    AM --> AN[Evaluate]
+    AN --> AO{Does it work well<br/>in the real target domain?}
+
+    AO -->|No| AP[Improve data / architecture /<br/>training / hyperparameters]
+    AP --> I
+
+    AO -->|Yes| AQ[Human-in-the-loop<br/>domain-specific evaluation]
+    AQ --> AR{Meets practical requirements?}
+
+    AR -->|No| AP
+    AR -->|Yes| AS([Production SLM])
+
+    %% Styling
+    classDef decision fill:#fff,stroke:#333,stroke-width:2px;
+    classDef process fill:#f5f5f5,stroke:#555;
+    classDef endpoint fill:#e8e8e8,stroke:#333,stroke-width:2px;
+
+    class B,D,E,J,N,P,R,V,AB,AE,AI,AO,AR decision;
+    class C,F,G,H,I,K,L,M,O,Q,S,T,U,W,X,Y,Z,AC,AD,AF,AG,AH,AJ,AK,AL,AM,AN,AP,AQ process;
+    class A,AS endpoint;
+```
