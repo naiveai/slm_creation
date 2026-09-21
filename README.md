@@ -23,7 +23,7 @@ model is able to accomplish.
 We are now witnessing a philosophical shift - from "bigger is better" to
 "smarter is better." This is the era of the Small Language Model.
 
-## The SLM Paradigm
+## Why Do SLMs Matter?
 
 In this article we'll be talking about Small Language Models (SLMs) — models
 that have on the order of millions to 1–4 billion parameters. By contrast,
@@ -31,31 +31,33 @@ today's frontier models have on the order of hundreds of billions to trillions
 of parameters. Even the smallest mainstream models, such as GPT-4o-mini, have 8
 billion parameters.
 
-One of the key advantages of training an SLM is efficiency. Smaller models
-require less computational power, consume fewer resources, and can often be
-deployed on edge devices. This makes them suitable for specialized applications
-where several critical factors come into play:
-
-- **Latency:** SLMs can respond in real time, which is critical for interactive
-applications like voice assistants or real-time translation running on local
-hardware.
-- **Privacy:** On-device processing ensures that sensitive data — medical
-records, legal documents, personal communications — never leaves the user's
-local environment.
-- **Cost:** Reduced hardware requirements mean SLMs can run inference on
-consumer-grade CPUs or modest GPUs, dramatically lowering the barrier to
-deployment.
-- **Specialization:** It is often easier, and more effective, to fine-tune a
-small model for a specific vertical — such as medical coding, legal contract
-analysis, or customer support — than it is to steer a massive generalist model
-toward a narrow task.
-
 Models like Microsoft's Phi-3, Mistral 7B, and TinyLlama have demonstrated that
 carefully constructed small models can punch well above their weight class,
 rivaling models many times their size on targeted benchmarks. Think of a massive
 LLM as a generalist professor with broad but sometimes shallow knowledge, while
 an SLM is more like a highly trained apprentice - deeply skilled within its
 domain and far more efficient to employ.
+
+## Why Smaller Can Be Better
+
+One of the key advantages of training an SLM is efficiency. Smaller models
+require less computational power, consume fewer resources, and can often be
+deployed on edge devices. This makes them suitable for specialized applications
+where several factors are more critical than in general cases:
+
+- **Latency:** SLMs can respond in real time, which is critical for interactive
+applications like voice assistants or real-time translation running on local
+hardware.
+- **Privacy:** On-device processing ensures that sensitive data such as medical
+records, legal documents or personal communications never leaves the user's
+local environment.
+- **Cost:** Reduced hardware requirements mean SLMs can run inference on
+consumer-grade CPUs or modest GPUs, dramatically lowering the barrier to
+deployment.
+- **Specialization:** It is often easier, and more effective, to fine-tune a
+small model for a specific vertical - such as medical coding, legal contract
+analysis, or customer support - than it is to steer a massive generalist model
+toward a narrow task.
 
 ## The Data Revolution: Quality Over Quantity
 
@@ -71,7 +73,16 @@ reasoning-dense text can outperform a model trained on a dataset many times
 larger but filled with low-quality noise. The researchers called this the
 "textbook quality" approach, drawing an analogy to the difference between
 studying from a well-written textbook versus reading random pages from the
-internet.
+internet. 
+
+For instance, a model designed on carefully chosen clean contracts may
+outperform a generalist model on tasks having to do with contracts such as
+extracting clauses or identifying potential loopholes. In general, the higher
+quality the data, the less of it you need in order to train a small model with
+acceptable performance. As long as a dataset has enough versatility for the
+tasks you need the model to perform, research has increasingly shown that you
+need surprisingly few samples to reach a certain baseline level of performance,
+with more samples providing relatively marginal improvements.
 
 This philosophy has several practical implications. First, **data curation**
 becomes paramount. Rather than ingesting raw web scrapes, teams invest heavily
@@ -123,28 +134,31 @@ parameter budget.
 
 ### Knowledge Distillation
 
-The basic idea of distillation is that a larger model acts as a teacher,
-guiding the training of a smaller student model. Rather than learning only
-from traditional datasets, the smaller model learns from the responses and
-behavior of the larger model. This allows it to capture patterns, knowledge, and
-decision-making strategies that would otherwise be difficult to learn directly.
+The basic idea behind distillation is that a larger model acts as a teacher for
+a smaller student model. Instead of learning solely from conventional training
+data, the student also learns from the teacher's outputs, behaviors, and
+patterns of problem-solving. This allows the smaller model to absorb knowledge
+and capabilities that would be difficult to acquire from the original training
+data alone.
 
-In modern distillation pipelines, the teacher model does more than simply
-provide final answers. It generates structured reasoning paths -
-Chain-of-Thought explanations that walk through a problem step by step. The
-student model is then trained not just to replicate the teacher's outputs, but
-to replicate its *reasoning process*. This is what allows a 3-billion-parameter
-model to exhibit reasoning abilities that seem disproportionate to its size.
+In modern distillation pipelines, the teacher can provide more than just
+final answers. It can generate detailed solutions, intermediate reasoning,
+demonstrations, and other forms of supervision that expose how it approaches a
+problem. The student is then trained to reproduce these behaviors, rather than
+simply memorizing the teacher's final outputs. This can allow a relatively small
+model, such as a 3-billion-parameter model, to acquire reasoning capabilities
+that would otherwise be difficult to achieve at that scale.
 
-Distillation can capture a surprisingly large amount of the performance of the
-larger model and make it much cheaper to run in production. But distillation
-is not a perfect process. Some information is inevitably lost when compressing
-a model. Complex reasoning abilities, nuanced knowledge, or strong performance
-on specialized tasks may not transfer completely. The art lies in choosing
-the right teacher, designing the right training curriculum, and knowing which
-capabilities to prioritize.
+Distillation can transfer a surprising amount of a larger model's capabilities
+while producing a model that is significantly cheaper and faster to run
+in production. However, it is not a lossless process. Some knowledge and
+capabilities inevitably fail to transfer, particularly when they depend on
+complex reasoning, subtle domain knowledge, or specialized behaviors. Effective
+distillation therefore depends on choosing an appropriate teacher, generating
+useful training data, designing an effective training curriculum, and deciding
+which capabilities are most important to preserve.
 
-## Training, Optimization, and Quantization
+## Making SLMs Work: Training, Optimization, and Quantization
 
 ### Pre-training and Fine-tuning
 
@@ -221,10 +235,20 @@ For SLMs, the most meaningful evaluation is often **domain-specific and
 human-in-the-loop**. If the model is meant to be a coding assistant, it
 should be tested on realistic coding tasks by actual developers. If it is
 a medical triage tool, it should be evaluated by clinicians against real
-patient scenarios. The "vibe check" - does this model actually feel useful
-in practice? - remains an underrated but essential complement to automated
-metrics.
+patient scenarios.
 
+SLMs excel in structured, domain-specific tasks where latency and cost are
+primary concerns. Classification, entity extraction, and pattern matching -
+tasks with well-defined output spaces—are where SLMs often match larger
+models at a fraction of the inference cost. However, SLMs still severely
+underperform in reasoning-heavy tasks that require multi-step logical deduction,
+large amounts of general knowledge/intuition, or handling out-of-distribution
+scenarios (problems that are very rare to non-existent in its training
+dataset). They typically require significantly more in-context examples than
+larger models to perform few-shot learning (samples should be provided during
+fine-tuning rather than during prompting, ideally), and they struggle with tasks
+demanding creativity, complex retrieval-augmented generation (RAG) pipelines, or
+understanding nuanced context across long documents.
 
 ## Conclusion
 
